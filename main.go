@@ -1,52 +1,37 @@
 package main
 
-import(
+import (
 	"fmt"
 )
 
-func main(){
-	fmt.Println("Hello world")
+func main() {
+	jobs := make(chan int, 100)
+	results := make(chan int, 100)
 
-	var x int
-	x = 1
+	go worker(jobs, results)
+	go worker(jobs, results)
 
-	y := 1
-
-	fmt.Println("x: ", x)
-	fmt.Println("y: ", y)
-
-	var arr [5]int
-	fmt.Println("arr", arr)
-	
-	arr[0] = 1
-	arr[1] = 2
-	
-	fmt.Println("arr", arr)
-	
-	arr = [5]int{5,4,3,2,1}
-	fmt.Println("arr", arr)
-	
-	slice := []int{1,2,3,4,5}
-	fmt.Println("slice", slice)
-	
-	slice = append(slice, 6)
-	fmt.Println("slice", slice)
-	
-	testmap := make(map[string]string)
-	fmt.Println("map", testmap)
-	testmap["key1"] = "value1"
-	testmap["key2"] = "value2"
-	fmt.Println("map", testmap)
-	
-	delete(testmap, "key2")
-	fmt.Println("map", testmap)
-
-	for i := 0; i < 10; i++ {
-		fmt.Println("i: ", i)
+	for i := 0; i < 100; i++ {
+		jobs <- i
 	}
 
-	for index, value := range arr {
-		fmt.Print("index: ", index)
-		fmt.Println("value: ", value)
+	close(jobs)
+
+	for j := 0; j < 100; j++ {
+		fmt.Println(<-results)
 	}
+}
+
+func worker(jobs <-chan int, results chan<- int) {
+	for n := range jobs {
+		results <- fib(n)
+	}
+}
+
+func fib(n int) int {
+	if n <= 1 {
+		return n
+	}
+
+	return fib(n-1) + fib(n-2)
 }
