@@ -1,52 +1,30 @@
 package main
 
-import(
+import (
+	"database/sql"
 	"fmt"
+	"learn-go/handler"
+	"learn-go/platform/newsfeed"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-func main(){
-	fmt.Println("Hello world")
+func main() {
+	fmt.Println("Hello There")
+	feed := newsfeed.New()
+	r := gin.Default()
+	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/test")
 
-	var x int
-	x = 1
-
-	y := 1
-
-	fmt.Println("x: ", x)
-	fmt.Println("y: ", y)
-
-	var arr [5]int
-	fmt.Println("arr", arr)
-	
-	arr[0] = 1
-	arr[1] = 2
-	
-	fmt.Println("arr", arr)
-	
-	arr = [5]int{5,4,3,2,1}
-	fmt.Println("arr", arr)
-	
-	slice := []int{1,2,3,4,5}
-	fmt.Println("slice", slice)
-	
-	slice = append(slice, 6)
-	fmt.Println("slice", slice)
-	
-	testmap := make(map[string]string)
-	fmt.Println("map", testmap)
-	testmap["key1"] = "value1"
-	testmap["key2"] = "value2"
-	fmt.Println("map", testmap)
-	
-	delete(testmap, "key2")
-	fmt.Println("map", testmap)
-
-	for i := 0; i < 10; i++ {
-		fmt.Println("i: ", i)
+	// if there is an error opening the connection, handle it
+	if err != nil {
+		panic(err.Error())
 	}
 
-	for index, value := range arr {
-		fmt.Print("index: ", index)
-		fmt.Println("value: ", value)
-	}
+	r.GET("/ping", handler.PingGet())
+	r.GET("/newsfeed", handler.NewsfeedGet(feed, db))
+	r.POST("/newsfeed", handler.NewsfeedPost(feed, db))
+	defer db.Close()
+	r.Run()
+
 }
